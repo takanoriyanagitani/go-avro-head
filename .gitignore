@@ -24,3 +24,4 @@ go.work.sum
 # env file
 .env
 *.swp
+cmd/avro2head2avro/avro2head2avro
