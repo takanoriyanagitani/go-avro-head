@@ -40,6 +40,11 @@ func RowsToWriter(
 		if nil != ee {
 			return ee
 		}
+
+		ee = enc.Flush()
+		if nil != ee {
+			return ee
+		}
 	}
 
 	return enc.Flush()
