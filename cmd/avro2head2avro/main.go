@@ -28,11 +28,30 @@ func GetEnvByKey(key string) util.Io[string] {
 	}
 }
 
+var blobSizeMaxString util.Io[string] = GetEnvByKey("ENV_BLOB_SIZE_MAX")
+var blobSizeMax util.Io[int] = util.Bind(
+	blobSizeMaxString,
+	util.Lift(strconv.Atoi),
+)
+
+var inputConfig util.Io[ah.InputConfig] = util.Bind(
+	blobSizeMax,
+	util.Lift(func(i int) (ah.InputConfig, error) {
+		return ah.InputConfigDefault.
+			WithBlobSizeMax(i), nil
+	}),
+)
+
 func StringToUint64(s string) (uint64, error) {
 	return strconv.ParseUint(s, 10, 64)
 }
 
-var input util.Io[ah.Input] = dh.StdinToRecords
+var input util.Io[ah.Input] = util.Bind(
+	inputConfig,
+	func(c ah.InputConfig) util.Io[ah.Input] {
+		return dh.ConfigToStdinToRows(c)
+	},
+)
 var output func(ah.Input) util.Io[util.Void] = eh.InputToStandardOutput
 
 var countString util.Io[string] = GetEnvByKey("ENV_COUNT")
